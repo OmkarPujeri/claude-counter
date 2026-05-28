@@ -148,6 +148,14 @@
 		usageResetMs.five_hour = normalized.five_hour?.resets_at ? Date.parse(normalized.five_hour.resets_at) : null;
 		usageResetMs.seven_day = normalized.seven_day?.resets_at ? Date.parse(normalized.seven_day.resets_at) : null;
 		ui.setUsage(normalized);
+
+		// Fire notifications if thresholds are crossed
+		if (CC.notifications) {
+			if (normalized.five_hour?.utilization != null)
+				CC.notifications.notifyIfNeeded('session', normalized.five_hour.utilization, usageResetMs.five_hour);
+			if (normalized.seven_day?.utilization != null)
+				CC.notifications.notifyIfNeeded('weekly', normalized.seven_day.utilization, usageResetMs.seven_day);
+		}
 	}
 
 	function updateOrgIdIfNeeded(newOrgId) {
