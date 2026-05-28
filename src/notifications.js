@@ -44,30 +44,18 @@
 
 	// ── fire a notification ──────────────────────────────────────────────────
 
-	function fire(type, pct, resetMs) {
-		const label   = type === 'session' ? 'Session (5h)' : 'Weekly';
-		const remaining = Math.max(0, 100 - pct).toFixed(0);
-		const resetIn   = resetMs ? formatMs(resetMs - Date.now()) : null;
+function fire(type, pct, resetMs) {
+    const label = type === 'session' ? 'Session (5h)' : 'Weekly';
+    const remaining = Math.max(0, 100 - pct).toFixed(0);
+    const resetIn = resetMs ? formatMs(resetMs - Date.now()) : null;
 
-		const title = `⚠️ Claude ${label} usage: ${Math.round(pct)}%`;
-		const body  = pct >= 100
-			? (resetIn ? `Limit reached — resets in ${resetIn}` : 'Limit reached for this window.')
-			: `${remaining}% remaining` + (resetIn ? ` — resets in ${resetIn}` : '');
+    const title = `⚠️ Claude ${label} usage: ${Math.round(pct)}%`;
+    const body = pct >= 100
+        ? (resetIn ? `Limit reached — resets in ${resetIn}` : 'Limit reached.')
+        : `${remaining}% remaining` + (resetIn ? ` — resets in ${resetIn}` : '');
 
-		// MV3 extensions: use chrome.notifications
-		if (typeof chrome !== 'undefined' && chrome.notifications?.create) {
-			chrome.notifications.create(`cc_${type}_${pct}`, {
-				type:     'basic',
-				iconUrl:  chrome.runtime.getURL('icons/icon48.png'),
-				title,
-				message:  body,
-				priority: pct >= 100 ? 2 : 1,
-			});
-		} else {
-			// Fallback: Web Notifications API
-			new Notification(title, { body });
-		}
-	}
+    chrome.runtime.sendMessage({ type: 'cc:notify', title, body });
+} 
 
 	// ── main notify function ─────────────────────────────────────────────────
 
